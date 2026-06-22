@@ -876,6 +876,11 @@ along the way; that's normal. You'll hear an error buzz, or two beeps for
 success. You can also run ``status`` to see whether ``(NFC)`` is listed
 next to one of your VCP devices.
 
+``SET NFC 1`` turns the reader on and ``SET NFC 0`` turns it off; the
+choice persists across reboots (a successful ``SET NFC 2`` also leaves it
+on). ``SET NFC 86`` forgets the paired reader so a later ``SET NFC 2`` can
+pair a different one.
+
 From now on, scanning a card produces one of three sounds: an error buzz
 if something went wrong, two beeps for success, or a single beep for a
 partial success.
@@ -948,6 +953,11 @@ write arms once the full payload arrives and runs on the current card or
 the next one presented. A second ``NFC_CMD_WRITE`` overwrites the first —
 last write wins.
 
+The payload may be at most 888 bytes; a longer length is rejected with the
+error tone and never armed. A write also fails (error tone) if it would run
+past the card's NDEF data area or target a page below 4, and a zero-length
+payload completes immediately as a no-op.
+
 ``NFC_CMD_READ`` always returns ``NFC_RESP_READ`` on the next ``read()``;
 if no card data is available, the length is zero.
 
@@ -957,7 +967,10 @@ read() -- Responses
 ``read()`` is non-blocking and streaming. It returns 0 bytes when there's
 nothing new. Responses may be split across multiple calls, so callers
 must buffer and reassemble them. State changes are sent once per change,
-including once right after ``open()``.
+including once right after ``open()``. Only the latest state is tracked, so
+a rapid transition (such as ``NFC_RESP_CARD_INSERTED`` immediately followed
+by ``NFC_RESP_CARD_READY``) may be coalesced to the later state if you don't
+``read()`` in between.
 
 .. list-table::
    :widths: 40 60
@@ -988,7 +1001,9 @@ After ``NFC_RESP_READ`` or ``NFC_RESP_WRITE``, send one or more tone
 commands or play your own sounds. Typically you request reads on
 ``NFC_RESP_CARD_READY`` and arm writes on ``NFC_RESP_NO_CARD``, but you
 can also arm a write after reading and verifying a card. The state
-changes give you flexibility in how you sequence operations.
+changes give you flexibility in how you sequence operations. The cached
+tag image is not refreshed by a write, so re-present the card before the
+next ``NFC_CMD_READ`` if you want to read back what you wrote.
 
 
 ROM File Format
