@@ -30,7 +30,8 @@ monitor.
 
 - **Set the network name (SSID).**
   ``SET SSID (ssid|-)`` sets your Wi-Fi network name, the Service Set
-  Identifier. Use ``-`` to clear it.
+  Identifier. Use ``-`` to clear it. Run ``help set ssid`` to scan for and
+  list nearby networks.
 
 - **Set the network password.**
   ``SET PASS (pass|-)`` sets your Wi-Fi password. Use ``-`` to clear it.
@@ -110,10 +111,13 @@ Example AT commands:
 - ``AT\L=23`` and ``AT\L?`` — Listen port for ``ATA`` (0 disables)
 - ``AT\N0`` or ``AT\N1`` and ``AT\N?`` — Network mode: 0=raw TCP, 1=telnet
 - ``AT\T=ANSI`` and ``AT\T?`` — Terminal type advertised during telnet negotiation
-- ``AT+RF=0`` or ``AT+RF=1`` and ``AT+RF?`` — Access RIA setting RF
-- ``AT+RFCC=US`` and ``AT+RFCC?`` — Access RIA setting RFCC
-- ``AT+SSID=your_ssid`` and ``AT+SSID?`` — Access RIA setting SSID
+- ``AT+RFCC=US``, ``AT+RFCC?``, and ``AT+RFCC!`` — Access RIA setting RFCC
+- ``AT+SSID=your_ssid``, ``AT+SSID?``, and ``AT+SSID!`` — Access RIA setting SSID
 - ``AT+PASS=your_pass`` and ``AT+PASS?`` — Access RIA setting PASS
+
+Each ``AT+`` setting uses ``=`` to set, ``?`` to query the current value,
+and ``!`` to list (``AT+SSID!`` scans for nearby networks, ``AT+RFCC!``
+lists supported country codes). Lists word-wrap to 80 columns.
 
 The modem is available as a set of special device names:
 
@@ -127,9 +131,12 @@ writes the profile back, ``ATZ`` reloads it, and ``AT&F`` restores
 factory defaults. Up to four modem devices can be open and in use at
 once.
 
-The ``AT+`` commands (``+RF``, ``+RFCC``, ``+SSID``, ``+PASS``) pass
-straight through to the global RIA settings and take effect immediately,
-no matter which modem device is open.
+The ``AT+`` commands (``+RFCC``, ``+SSID``, ``+PASS``) pass straight
+through to the global RIA settings and take effect immediately, no matter
+which modem device is open.
+
+The modem needs the radio. Opening any ``AT`` device fails with ``ENODEV``
+while the radio is off (``SET RF 0``); enable it with ``SET RF 1``.
 
 
 Bluetooth

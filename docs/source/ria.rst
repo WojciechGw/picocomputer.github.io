@@ -238,6 +238,9 @@ on it.
   * - $0:1:00
     - PSG
     - See `Programmable Sound Generator`_ section
+  * - $0:1:01
+    - OPL
+    - See `Yamaha OPL2 FM Sound Generator`_ section
 
 
 Pico Information Exchange (PIX)
@@ -742,23 +745,28 @@ assigned in the order cables appear, up to four at a time. A simple
 keyboard is one cable (1X1); a multi-port interface is several. Open one
 like a file.
 
-These are not plain byte pipes. Raw MIDI has no timing, so the RIA
-handles timing for you using the event format from Standard MIDI Files:
-every MIDI message is prefixed with a variable length quantity delta
-time, measured in ticks. Time starts at the open — the first byte in
-either direction is a delta measuring from the open itself, and a delta
-of zero means right now. Writes are scheduled — the RIA holds each
-message and sends it to the instrument exactly on time, so your program
-only needs to keep the buffer fed. Reads are a recording — incoming
-messages arrive with delta times measuring when they actually happened,
-ready to store in a file or play back later.
+A cable opens in one of two modes, chosen by the open name. Bare
+``"MIDI0:"`` is **raw** — reads and writes are plain wire MIDI, the same
+bytes a 5-pin DIN cable carries, with no timing and nothing added or
+removed. Give a division instead, ``"MIDI0:480"``, and the cable is
+**timed**: the RIA handles timing for you using the event format from
+Standard MIDI Files, prefixing every message with a variable length
+quantity delta time measured in ticks. The rest of this section is the
+timed format; raw mode is just the wire bytes.
 
-The division — ticks per quarter note, what an SMF carries in its
-header — goes in the open name: ``"MIDI0:96"``. It defaults to 480,
-accepts 1 to 32767, and is fixed while open; reopen between songs to
-change it. The open flags are ignored. A cable can be input, output, or
-both; reading an output-only cable or writing an input-only one returns
-an error.
+In timed mode, time starts at the open — the first byte in either
+direction is a delta measuring from the open itself, and a delta of zero
+means right now. Writes are scheduled — the RIA holds each message and
+sends it to the instrument exactly on time, so your program only needs to
+keep the buffer fed. Reads are a recording — incoming messages arrive
+with delta times measuring when they actually happened, ready to store in
+a file or play back later.
+
+The division — ticks per quarter note, what an SMF carries in its header —
+accepts 1 to 32767 and is fixed while open; reopen between songs to change
+it. The open flags are ignored. A cable can be input, output, or both;
+reading an output-only cable or writing an input-only one returns an
+error.
 
 Tempo changes on the fly with the standard SMF Set Tempo meta event,
 which the RIA consumes locally and never forwards to the instrument —
@@ -830,6 +838,16 @@ stop reading, the recording drops whole messages rather than backing up,
 and the timing of everything that survives stays exact. Reads and writes
 are non-blocking with the same short read/write rules as other
 non-blocking devices.
+
+Closing a timed output cable blocks until its buffered tail has played
+out on schedule, so the final notes — and the note-offs that end them —
+reach the instrument before close returns, and nothing is left ringing.
+``sync`` does the same without closing: a way to wait for the schedule to
+catch up between songs. Both follow the timeline, so a far-future delta
+still in the buffer makes them wait that long. If a sysex is still open
+when a timed cable closes, the RIA sends its ``F7`` so the instrument is
+not left waiting mid-dump. A raw cable has no schedule, so close and
+``sync`` simply flush what is buffered, and they inject no ``F7``.
 
 
 Near Field Communications (NFC)

@@ -705,10 +705,11 @@ LSEEK
    :param offset: How far you wish to seek.
    :param whence: From whence you wish to seek. See table below.
    :param fildes: File descriptor from open().
-   :returns: Read/write position. -1 on error. If this value would be too
-      large for a long, the returned value will be 0x7FFFFFFF.
+   :returns: Read/write position. -1 on error. A resulting position past
+      0x7FFFFFFF cannot be represented in the returned long; the seek then
+      fails with errno ERANGE and the file position is left unchanged.
    :a regs: fildes
-   :errno: EINVAL, FR_DISK_ERR, FR_INT_ERR, FR_INVALID_OBJECT, FR_TIMEOUT
+   :errno: EINVAL, ERANGE, FR_DISK_ERR, FR_INT_ERR, FR_INVALID_OBJECT, FR_TIMEOUT
 
    .. list-table::
       :header-rows: 1
@@ -1039,6 +1040,7 @@ CHDRIVE
 
    Change the current drive.
    Valid names are ``MSC0:``–``MSC9:`` with shortcuts ``0:``–``9:``.
+   Each USB device (LUN) mounts as one drive.
 
    :Op code: RIA_OP_CHDRIVE 0x2A
    :C proto: rp6502.h
