@@ -173,8 +173,8 @@ glyphs change color.
     - 1 - Character
   * - $1:0:02
     - OPTIONS
-      | bit 0:2 - 0=1, 1=4r, 2=4, 3=8, or 4=16 bit color
-    - | bit 3 - font size 0=8x8, 1=8x16
+    - | bit 0:2 - 0=1, 1=4r, 2=4, 3=8, or 4=16 bit color
+      | bit 3 - font size 0=8x8, 1=8x16
   * - $1:0:03
     - CONFIG
     - Address of config structure in XRAM.
@@ -280,10 +280,10 @@ is repeated across a large map.
     - 2 - Tile
   * - $1:0:02
     - OPTIONS
-      | bit 0:2 - 0=1, 1=2, 2=4, or 3=8 bit color
+    - | bit 0:2 - 0=1, 1=2, 2=4, or 3=8 bit color
       | bit 3 - 0=8x8, 1=16x16
       | bit 4:7 - X trim, columns dropped off the tile right (0-15)
-    - | bit 8:11 - Y trim, rows dropped off the tile bottom (0-15)
+      | bit 8:11 - Y trim, rows dropped off the tile bottom (0-15)
   * - $1:0:03
     - CONFIG
     - Address of config structure in XRAM.
@@ -365,8 +365,8 @@ or 256 colors at 320x180 (16:9).
     - 3 - Bitmap
   * - $1:0:02
     - OPTIONS
-      | bit 0:2 - 0=1, 1=2, 2=4, 3=8, or 4=16 bit color
-    - | bit 3 - reverse bit order
+    - | bit 0:2 - 0=1, 1=2, 2=4, 3=8, or 4=16 bit color
+      | bit 3 - reverse bit order
   * - $1:0:03
     - CONFIG
     - Address of config structure in XRAM.
@@ -517,8 +517,8 @@ bullets on the third.
     - 5 - Sprite
   * - $1:0:02
     - OPTIONS
-      | bit 0:2 - 0=1, 1=2, 2=4, or 3=8 bit color
-    - | bit 3:5 - 0=8x8, 1=16x16, 2=32x32, 3=64x64, 4=128x128, 5=256x256, 6=512x512
+    - | bit 0:2 - 0=1, 1=2, 2=4, or 3=8 bit color
+      | bit 3:5 - 0=8x8, 1=16x16, 2=32x32, 3=64x64, 4=128x128, 5=256x256, 6=512x512
       | 512x512 only supports 1-bit and 2-bit color.
   * - $1:0:03
     - CONFIG
